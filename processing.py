@@ -1,5 +1,6 @@
 from PIL import Image
 import sys
+from wrkwithbd import DBFWorking
 
 
 class Filters:
@@ -113,6 +114,6 @@ class Processing(Filters, Shaping):
             self.image.save(res_file + '.jpg')
 
 
-prc = Processing('Test.jpg')
-prc.rotate(70)
-prc.save()
+photos_db = DBFWorking('photos.db')
+prc = Processing(*photos_db.get_photo(1112))
+prc.image.show()
