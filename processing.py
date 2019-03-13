@@ -1,6 +1,5 @@
-from PIL import Image
 import sys
-from wrkwithbd import DBFWorking
+from wwdb import *
 
 
 class Filters:
@@ -95,25 +94,13 @@ class Shaping:
 
 class Processing(Filters, Shaping):
 
-    def __init__(self, image=None):
-        self.open_image(image)
-        super().__init__(self.image)
-
-    def open_image(self, image):
-        if type(image) == str:
-            self.image = Image.open(image)
-        elif image:
-            self.image = image
-        else:
-            sys.exit("I don't know name of image you need(((")
-
-    def save(self, res_file='res.jpg'):
-        try:
-            self.image.save(res_file)
-        except ValueError:
-            self.image.save(res_file + '.jpg')
+    def __init__(self, image):
+        super().__init__(image)
 
 
-photos_db = DBFWorking('photos.db')
-prc = Processing(*photos_db.get_photo(1112))
-prc.image.show()
+user = DBUWorking('Alexandro')
+print(user.sign_up('rewq'))
+if user.access:
+    print('yes')
+else:
+    print('(((')
