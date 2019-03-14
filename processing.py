@@ -98,9 +98,10 @@ class Processing(Filters, Shaping):
         super().__init__(image)
 
 
-user = DBUWorking('Alexandro')
-print(user.sign_up('rewq'))
+user = DBWorking('Alexandro')
+print(user.sign_in('rewq'))
 if user.access:
-    print('yes')
+    im = Processing(user.open_image('res1'))
+    user.save_image(im, 'res')
 else:
     print('(((')

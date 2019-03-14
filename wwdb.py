@@ -23,6 +23,7 @@ class ImWorking:
         while saving:
             try:
                 pic.save('{}/{}'.format(self.user, name))
+                self.save_im_info(name)
                 saving = False
             except FileNotFoundError:
                 os.mkdir(self.user)
@@ -32,12 +33,24 @@ class ImWorking:
                 pic = pic.image
 
 
-class DBUWorking(ImWorking):
+class DBWorking(ImWorking):
     def __init__(self, login, db_name='users.db'):
         self.connection = sqlite3.connect(db_name, check_same_thread=False)
         self.access = False
         self.login = login
         super().__init__(login)
+
+    def save_im_info(self, name):
+        cursor = self.connection.cursor()
+        cursor.execute('INSERT INTO images (login, im_name, likes) VALUES (?,?,?)', (self.login, name, 0))
+        self.connection.commit()
+
+    def image_info(self, name):
+        cursor = self.connection.cursor()
+        cursor.execute('SELECT * FROM images WHERE login = ? AND im_name = ?', (self.login, name))
+        info = cursor.fetchone()
+        cursor.close()
+        return info
 
     def is_login_created(self, login):
         cursor = self.connection.cursor()
