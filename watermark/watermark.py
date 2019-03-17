@@ -19,7 +19,7 @@ def add_watermark(image, watermark, opacity=1, wm_interval=0):
 
 if __name__ == "__main__":
     img = Image.open("1337.jpg")
-    watermark = Image.open("LOGO.png")
+    watermark = Image.open("watermark.png")
 
 
     result = add_watermark(img, watermark)
