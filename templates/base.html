@@ -1,0 +1,45 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <title>PyPixel</title>
+</head>
+<body>
+<header>
+    <div class="row">
+        <div class="col-1">
+            <img src="static/logo.png" alt="Sorry" width="150" height="150" class="text-left">
+        </div>
+        <div class="col-2">
+            <br>
+            <h1 class="text-left"> Let's rock </h1>
+        </div>
+        <div class="col-4">
+            <br>
+            <h1 class="text-right">
+                <form method="post">{{ form.main_page() }}</form>
+            </h1>
+        </div>
+        <div class="col-1">
+            <br>
+            <h1 class="text-right">
+                <form method="post">{{ form.editor() }}</form>
+            </h1>
+        </div>
+        <div class="col-3">
+            <br>
+            <h1 class="text-right">
+                <form method="post">{{ form.authorise() }}</form>
+            </h1>
+        </div>
+    </div>
+
+</header>
+<main>
+    {% block content %}{% endblock %}
+</main>
+</body>
+</html>
