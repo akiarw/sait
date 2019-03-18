@@ -23,6 +23,6 @@ if __name__ == "__main__":
 
 
     result = add_watermark(img, watermark)
-result.save('result.png')
+result.save('res.png')
 
 
