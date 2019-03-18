@@ -2,6 +2,7 @@ from flask import Flask, render_template, redirect, request
 from flask_wtf import FlaskForm
 from wtforms import *
 from wtforms.validators import DataRequired
+from wwdb import DBWorking
 
 
 class MainForm(FlaskForm):
@@ -11,10 +12,12 @@ class MainForm(FlaskForm):
 
 
 class LoginForm(FlaskForm):
-    username = StringField('Логин', validators=[DataRequired()])
-    password = PasswordField('Пароль', validators=[DataRequired()])
-    remember_me = BooleanField('Запомнить меня')
-    submit = SubmitField('Войти')
+    reg_login = login = StringField('Логин', validators=[DataRequired()])
+    reg_pwd = pwd = PasswordField('Пароль', validators=[DataRequired()])
+    sign_in = SubmitField('Войти')
+
+    pwd_again = PasswordField('Подтвердите пароль', validators=[DataRequired()])
+    sign_up = SubmitField('Зарегистрироваться')
 
 
 class Server:
@@ -22,28 +25,46 @@ class Server:
         @app.route('/', methods=["GET", "POST"])
         @app.route('/main', methods=["GET", "POST"])
         def main():
-            form = MainForm()
+            main_form = MainForm()
             red = redirection()
             if red:
                 return red
-            return render_template('main.html', form=form)
+            return render_template('main.html', form=main_form)
 
         @app.route('/sign', methods=["GET", "POST"])
         def sign():
-            form = MainForm()
+            main_form = MainForm()
             log_form = LoginForm()
+
+            if request.form:
+                if request.form.get('sign_in'):
+                    login = request.form['login']
+                    pwd = request.form['pwd']
+                    if login and pwd:
+                        if sign_in(login, pwd) == 'successful':
+                            return redirect('/account')  # сами введите нужный адрес
+
+                elif request.form.get('sign_up'):
+                    login = request.form['reg_login']
+                    pwd = request.form['reg_pwd']
+                    repwd = request.form['pwd_again']
+                    if login and pwd:
+                        if pwd == repwd:
+                            if sign_up(login, pwd) == 'successful':
+                                return redirect('/account')  # сами введите нужный адрес
+
             red = redirection()
             if red:
                 return red
-            return render_template('sign.html', form=form, log_form=log_form)
+            return render_template('sign.html', form=main_form, log_form=log_form)
 
         @app.route('/editor', methods=["GET", "POST"])
         def editor():
-            form = MainForm()
+            main_form = MainForm()
             red = redirection()
             if red:
                 return red
-            return render_template('redactor.html', form=form)
+            return render_template('redactor.html', form=main_form)
 
         def redirection():
             if request.form:
@@ -57,7 +78,18 @@ class Server:
                 elif edit:
                     return redirect('/editor')
 
+        def sign_in(login, pwd):
+            global user
+            user = DBWorking(login)
+            return user.sign_in(pwd)
 
+        def sign_up(login, pwd):
+            global user
+            user = DBWorking(login)
+            return user.sign_up(pwd)
+
+
+user = None
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'Alexcoratt_secret_key'
 serv = Server()
