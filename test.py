@@ -93,4 +93,4 @@ user = None
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'Alexcoratt_secret_key'
 serv = Server()
-app.run('127.0.0.1', 8000)
+app.run('127.0.0.1', 8090)
