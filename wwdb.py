@@ -22,7 +22,7 @@ class ImWorking:
         saving = True
         while saving:
             try:
-                pic.save('{}/{}'.format(self.user, name))
+                pic.save('static/{}/{}'.format(self.user, name))
                 self.save_im_info(name)
                 saving = False
             except FileNotFoundError:
@@ -49,6 +49,13 @@ class DBWorking(ImWorking):
         cursor = self.connection.cursor()
         cursor.execute('SELECT * FROM images WHERE login = ? AND im_name = ?', (self.login, name))
         info = cursor.fetchone()
+        cursor.close()
+        return info
+
+    def all_images(self):
+        cursor = self.connection.cursor()
+        cursor.execute('SELECT im_name FROM images WHERE login = ?', (self.login,))
+        info = cursor.fetchall()
         cursor.close()
         return info
 
@@ -83,7 +90,7 @@ class DBWorking(ImWorking):
             self.connection.commit()
             cursor.close()
             self.access = True
-            os.mkdir(self.user)
+            os.mkdir('static/'+self.user)
             return 'successful'
         except sqlite3.IntegrityError:
             cursor.close()
