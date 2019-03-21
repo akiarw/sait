@@ -2,8 +2,10 @@
 
 {% block content %}
 <h1>{{nickname}}</h1><br><br>
-<h2>Ваши изображения</h2>
+<h2>Ваша коллекция</h2>
 {% for name in names %}
-<img src=static/{{nicname}}/{{name}}>
+<br><br><br>
+<h3>{{name}}</h3>
+<img src="static/{{nickname}}/{{name}}" alt="О ужас, фотография пропала! Мы уже работаем над исправлением этой ошибки!">
 {% endfor %}
 {% endblock %}
