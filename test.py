@@ -3,6 +3,7 @@ from flask_wtf import FlaskForm
 from wtforms import *
 from wtforms.validators import DataRequired
 from wwdb import DBWorking
+import os
 
 
 class MainForm(FlaskForm):
@@ -19,6 +20,15 @@ class LoginForm(FlaskForm):
 
     pwd_again = PasswordField('Подтвердите пароль', validators=[DataRequired()])
     sign_up = SubmitField('Зарегистрироваться')
+
+
+class AddImageForm(FlaskForm):
+    img = FileField('Выбрать изображение', validators=[DataRequired()])
+    get_im = SubmitField('Подтвердить')
+
+
+class EditForm(AddImageForm):
+    pass
 
 
 class Server:
@@ -38,31 +48,42 @@ class Server:
             global user
             main_form = MainForm()
             log_form = LoginForm()
+            res = None
 
             if request.form:
                 if request.form.get('sign_in'):
                     res = sign_in()
-                    if res:
+                    if type(res) != str:
                         return res
 
                 elif request.form.get('sign_up'):
                     res = sign_up()
-                    if res:
+                    if type(res) != str:
                         return res
 
             red = redirection()
             if red:
                 return red
-            return render_template('sign.html', form=main_form, log_form=log_form, user=user)
+            return render_template('sign.html', form=main_form, log_form=log_form, user=user,
+                                   status=res if type(res) == str else '')
 
         @app.route('/editor', methods=["GET", "POST"])
         def editor():
             global user
             main_form = MainForm()
+            edit_form = EditForm()
             red = redirection()
+
+            if request.files:
+                image = request.files['img']
+                name = str(image).split()[1][1:-1]
+                with open(make_edit_dir() + name, 'wb') as file:
+                    file.write(image.read())
+                return redirect('/edit_step2')
+
             if red:
                 return red
-            return render_template('redactor.html', form=main_form, user=user)
+            return render_template('redactor.html', form=main_form, user=user, edit_form=edit_form)
 
         @app.route('/account', methods=['GET', 'POST'])
         def account():
@@ -77,17 +98,16 @@ class Server:
         def redirection():
             if request.form:
                 global user
-                mp = request.form.get("main_page")
-                auth = request.form.get("authorise")
-                edit = request.form.get("editor")
-                if mp:
+                if request.form.get("main_page"):
                     return redirect('/main')
-                elif auth:
+                elif request.form.get("authorise"):
                     user = None
                     MainForm.authorise = SubmitField('Авторизация')
                     return redirect('/sign')
-                elif edit:
+                elif request.form.get("editor"):
                     return redirect('/editor')
+                elif request.form.get("my_acc"):
+                    return redirect('/account')
 
         def sign_in():
             global user
@@ -99,8 +119,7 @@ class Server:
                 if status == 'successful':
                     MainForm.authorise = SubmitField('Выход')
                     return redirect('/account')
-                else:
-                    print(status)
+                return status
 
         def sign_up():
             global user
@@ -114,13 +133,19 @@ class Server:
                     if status == 'successful':
                         MainForm.authorise = SubmitField('Выход')
                         return redirect('/account')  # сами введите нужный адрес
-                    else:
-                        print(status)
-                else:
-                    print('different passwords')
+                    return status
+                return 'different passwords'
+
+        def make_edit_dir():
+            global mk_dir_num
+            mk_dir_num += 1
+            name = 'static/' + str(mk_dir_num) + '/'
+            os.mkdir(name)
+            return name
 
 
 user = None
+mk_dir_num = 0
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'Vitalya_secret_key'
 serv = Server()

@@ -2,4 +2,8 @@
 
 {% block content %}
 <h2>Редактор</h2>
+<form method="post" enctype="multipart/form-data" novalidate>
+    {{edit_form.img()}}
+    {{edit_form.get_im()}}
+</form>
 {% endblock %}

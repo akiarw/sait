@@ -2,8 +2,26 @@
 
 {% block content %}
 <h1>{{nickname}}</h1><br><br>
-<h2>Ваши изображения</h2>
-{% for name in names %}
-<img src=static/{{nicname}}/{{name}}>
-{% endfor %}
+<h2>Ваша коллекция</h2>
+
+<div class="col-8">
+    {% for name in names %}
+    <br><br><br>
+    <h3>{{name}}</h3>
+    <div id="carouselExampleSlidesOnly" class="carousel slide" data-ride="carousel">
+      <div class="carousel-inner">
+        <div class="carousel-item active">
+            <img src="static/{{nickname}}/{{name}}" class="d-block w-100" alt="...">
+        </div>
+        <div class="carousel-item">
+          <img src="static/{{nickname}}/{{name}}" class="d-block w-100" alt="...">
+        </div>
+        <div class="carousel-item">
+          <img src="static/{{nickname}}/{{name}}" class="d-block w-100" alt="...">
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+</div>
+<br><br>
 {% endblock %}

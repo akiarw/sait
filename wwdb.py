@@ -57,7 +57,7 @@ class DBWorking(ImWorking):
         cursor.execute('SELECT im_name FROM images WHERE login = ?', (self.login,))
         info = cursor.fetchall()
         cursor.close()
-        return info
+        return [i[0] for i in info]
 
     def is_login_created(self, login):
         cursor = self.connection.cursor()
@@ -90,7 +90,7 @@ class DBWorking(ImWorking):
             self.connection.commit()
             cursor.close()
             self.access = True
-            os.mkdir('static/'+self.user)
+            os.mkdir('static/' + self.user)
             return 'successful'
         except sqlite3.IntegrityError:
             cursor.close()
