@@ -85,6 +85,14 @@ class Server:
                 return red
             return render_template('redactor.html', form=main_form, user=user, edit_form=edit_form)
 
+        @app.route('/edit_step2', methods=['GET', 'POST'])
+        def step2():
+            main_form = MainForm()
+            red = redirection()
+            if red:
+                return red
+            return render_template('edit_step2.html', form=main_form)
+
         @app.route('/account', methods=['GET', 'POST'])
         def account():
             global user
@@ -139,8 +147,14 @@ class Server:
         def make_edit_dir():
             global mk_dir_num
             mk_dir_num += 1
-            name = 'static/' + str(mk_dir_num) + '/'
-            os.mkdir(name)
+            is_created = False
+            while not is_created:
+                try:
+                    name = 'static/' + str(mk_dir_num) + '/'
+                    os.mkdir(name)
+                    is_created = True
+                except FileExistsError:
+                    mk_dir_num += 1
             return name
 
 

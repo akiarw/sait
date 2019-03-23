@@ -1,9 +1,24 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Редактор</h2>
-<form method="post" enctype="multipart/form-data" novalidate>
-    {{edit_form.img()}}
-    {{edit_form.get_im()}}
-</form>
+<div class="row">
+    <div class="col-7">
+        <div class="text-center"><h1>Все просто, как 1, 2, 3...</h1></div>
+    </div>
+</div><br><br>
+<div class="row">
+    <div class="col-2">
+        <div class="text-center"><h1>Шаг 1</h1></div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-3">
+        <h2>Загрузи свое фото</h2></div>
+    <div class="col-7">
+        <form method="post" enctype="multipart/form-data" novalidate>
+            {{edit_form.img()}}
+            {{edit_form.get_im()}}
+        </form>
+    </div>
+</div>
 {% endblock %}
