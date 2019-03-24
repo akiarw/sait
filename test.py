@@ -11,6 +11,8 @@ class MainForm(FlaskForm):
     editor = SubmitField('Редактор')
     authorise = SubmitField('Авторизация')
     my_acc = SubmitField('Моя коллекция')
+    go_to_step3 = SubmitField('Перейти к следующему шагу')
+    apply = SubmitField('Применить')
 
 
 class LoginForm(FlaskForm):
@@ -24,7 +26,7 @@ class LoginForm(FlaskForm):
 
 class AddImageForm(FlaskForm):
     img = FileField('Выбрать изображение', validators=[DataRequired()])
-    get_im = SubmitField('Подтвердить')
+    get_im = SubmitField('Перейти к следующему шагу')
 
 
 class EditForm(AddImageForm):
@@ -83,7 +85,7 @@ class Server:
 
             if red:
                 return red
-            return render_template('redactor.html', form=main_form, user=user, edit_form=edit_form)
+            return render_template('editor.html', form=main_form, user=user, edit_form=edit_form)
 
         @app.route('/edit_step2', methods=['GET', 'POST'])
         def step2():
@@ -92,6 +94,15 @@ class Server:
             if red:
                 return red
             return render_template('edit_step2.html', form=main_form)
+
+        @app.route('/edit_step3', methods=['GET', 'POST'])
+        def step3():
+            main_form = MainForm()
+            red = redirection()
+            edit_from = EditForm()
+            if red:
+                return red
+            return render_template('edit_step3.html', form=main_form)
 
         @app.route('/account', methods=['GET', 'POST'])
         def account():
@@ -116,6 +127,10 @@ class Server:
                     return redirect('/editor')
                 elif request.form.get("my_acc"):
                     return redirect('/account')
+                elif request.form.get("go_to_step3"):
+                    return redirect('/edit_step3')
+                elif request.form.get("apply"):
+                    return redirect('/edit_step3')
 
         def sign_in():
             global user
