@@ -4,6 +4,128 @@ from wtforms import *
 from wtforms.validators import DataRequired
 from wwdb import DBWorking
 import os
+from PIL import Image
+import sys
+
+
+class Filters:
+
+    def __init__(self, image):
+        self.image = image
+        self.size_x, self.size_y = self.image.size
+        self.matrix = self.image.load()
+
+    def negative(self):
+        self.matrix = self.image.load()
+        for x in range(self.size_x):
+            for y in range(self.size_y):
+                self.matrix[x, y] = tuple(map(lambda cl: 255 - cl, self.matrix[x, y]))
+
+    def full_monochrome(self, power=350):
+        self.matrix = self.image.load()
+        for x in range(self.size_x):
+            for y in range(self.size_y):
+                self.matrix[x, y] = (255, 255, 255) if sum(self.matrix[x, y]) > power else (0, 0, 0)
+
+    def monochrome(self):
+        self.matrix = self.image.load()
+        for x in range(self.size_x):
+            for y in range(self.size_y):
+                med = sum(self.matrix[x, y]) // 3
+                self.matrix[x, y] = med, med, med
+
+    def sepia(self, koeff=30):
+        self.matrix = self.image.load()
+        for x in range(self.size_x):
+            for y in range(self.size_y):
+                self.matrix[x, y] = tuple(map(lambda cl, i: cl + koeff * i, self.matrix[x, y], range(2, -1, -1)))
+
+    def anagliph(self, delta=10):
+        self.matrix = self.image.load()
+        for x in range(self.size_x - delta - 1, -1, -1):
+            for y in range(self.size_y):
+                r, g, b = self.matrix[x, y]
+                r1, g1, b1 = self.matrix[x + delta, y]
+                self.matrix[x + delta, y] = r, g1, b1
+
+    def bright(self, koeff=10):
+        self.matrix = self.image.load()
+        for x in range(self.size_x):
+            for y in range(self.size_y):
+                self.matrix[x, y] = tuple(
+                    map(lambda cl: 255 if cl + koeff > 255 else 0 if cl + koeff < 0 else cl + koeff, self.matrix[x, y]))
+
+    def mosaic(self, lup=(0, 0), rdwn=None, power=30):
+        if not rdwn:
+            rdwn = (self.size_x, self.size_y)
+        for i in range(lup[1], rdwn[1], power * 2):
+            self.move_fragment((lup[0], i), (rdwn[0], i + power), (-1) ** i * power)
+        for i in range(lup[0], rdwn[0], power * 2):
+            self.move_fragment((i + power, lup[1] - power), (i + power * 2, rdwn[1] - power), delta_y=(-1) ** i * power)
+
+
+class Shaping:
+
+    def __init__(self, image):
+        self.image = image
+        self.size_x, self.size_y = self.image.size
+        self.sub_image = None
+
+    def resize(self, x, y=None, is_perc=False):
+        if is_perc:
+            if y:
+                x *= self.size_x // 100
+                y *= self.size_y // 100
+            else:
+                x = (x[0] * self.size_x // 100, x[1] * self.size_y // 100)
+        if y:
+            self.image = self.image.resize((x, y))
+            self.size_x, self.size_y = x, y
+        else:
+            self.image = self.image.resize(x)
+            self.size_x, self.size_y = x
+
+    def crop(self, lup, rdwn, is_perc=False):
+        if is_perc:
+            lup = (lup[0] * self.size_x // 100, lup[1] * self.size_y // 100)
+            rdwn = (rdwn[0] * self.size_x // 100, rdwn[1] * self.size_y // 100)
+        self.image = self.image.crop(lup + rdwn)
+        self.size_x, self.size_y = self.image.size
+
+    def move_fragment(self, lup, rdwn, delta_x=0, delta_y=0):
+        self.sub_image = Processing(self.image)
+        self.sub_image.crop(lup, rdwn)
+        self.sub_image.paste_image((lup[0] + delta_x, lup[1] + delta_y), self)
+
+    def paste_image(self, pos, screen=None):
+        if screen:
+            screen.image.paste(self.image, pos)
+        else:
+            sys.exit("I don't know name of screen you mean(((")
+
+    def rotate(self, angle):
+        self.image = self.image.rotate(angle)
+
+
+class Processing(Filters, Shaping):
+
+    def __init__(self, image=None):
+        self.open_image(image)
+        super().__init__(self.image)
+
+    def open_image(self, image):
+        if type(image) == str:
+            self.image = Image.open(image)
+        elif image:
+            self.image = image
+        else:
+            sys.exit("I don't know name of image you need(((")
+
+    def save(self, res_file='res.jpg'):
+        try:
+            self.image.save(res_file)
+        except ValueError:
+            self.image.save(res_file + '.jpg')
 
 
 class MainForm(FlaskForm):
@@ -12,7 +134,13 @@ class MainForm(FlaskForm):
     authorise = SubmitField('Авторизация')
     my_acc = SubmitField('Моя коллекция')
     go_to_step3 = SubmitField('Перейти к следующему шагу')
-    apply = SubmitField('Применить')
+    sepia = SubmitField('Сепия')
+    anagliph = SubmitField('Анаглиф ')
+    mosaic = SubmitField('Мозайка')
+    monochrome = SubmitField('Монохром')
+    full_monochrome = SubmitField('HARD Монохром')
+    negative = SubmitField('Негатив')
+    bright = SubmitField('Яркость')
 
 
 class LoginForm(FlaskForm):
@@ -30,7 +158,8 @@ class AddImageForm(FlaskForm):
 
 
 class EditForm(AddImageForm):
-    pass
+    size_x = x = StringField('x')
+    size_y = y = StringField('y')
 
 
 class Server:
@@ -51,7 +180,6 @@ class Server:
             main_form = MainForm()
             log_form = LoginForm()
             res = None
-
             if request.form:
                 if request.form.get('sign_in'):
                     res = sign_in()
@@ -75,12 +203,15 @@ class Server:
             main_form = MainForm()
             edit_form = EditForm()
             red = redirection()
-
             if request.files:
                 image = request.files['img']
+                global way
                 name = str(image).split()[1][1:-1]
-                with open(make_edit_dir() + name, 'wb') as file:
+                way = make_edit_dir() + name
+                with open(way, 'wb') as file:
                     file.write(image.read())
+                global prc
+                prc = Processing(way)
                 return redirect('/edit_step2')
 
             if red:
@@ -91,18 +222,41 @@ class Server:
         def step2():
             main_form = MainForm()
             red = redirection()
+            edit_form = EditForm()
             if red:
                 return red
-            return render_template('edit_step2.html', form=main_form)
+            return render_template('edit_step2.html', form=main_form, edit_form=edit_form)
 
-        @app.route('/edit_step3', methods=['GET', 'POST'])
+        @app.route('/edit_step3' methods=['GET', 'POST'])
         def step3():
             main_form = MainForm()
             red = redirection()
-            edit_from = EditForm()
+            edit_form = EditForm()
             if red:
                 return red
-            return render_template('edit_step3.html', form=main_form)
+            if request.form:
+                if request.form.get('sepia'):
+                    prc.sepia()
+                    prc.save(way)
+                elif request.form.get('anagliph'):
+                    prc.anagliph()
+                    prc.save(way)
+                elif request.form.get('mosaic'):
+                    prc.mosaic()
+                    prc.save(way)
+                elif request.form.get('monochrome'):
+                    prc.monochrome()
+                    prc.save(way)
+                elif request.form.get('full_monochrome'):
+                    prc.full_monochrome()
+                    prc.save(way)
+                elif request.form.get('negative'):
+                    prc.negative()
+                    prc.save(way)
+                elif request.form.get('bright'):
+                    prc.bright()
+                    prc.save(way)
+            return render_template('edit_step3.html', form=main_form, edit_form=edit_form, src=way)
 
         @app.route('/account', methods=['GET', 'POST'])
         def account():
@@ -165,12 +319,12 @@ class Server:
             is_created = False
             while not is_created:
                 try:
-                    name = 'static/' + str(mk_dir_num) + '/'
-                    os.mkdir(name)
+                    way = 'static/A' + str(mk_dir_num) + '/'
+                    os.mkdir(way)
                     is_created = True
                 except FileExistsError:
                     mk_dir_num += 1
-            return name
+            return way
 
 
 user = None

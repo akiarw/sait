@@ -13,34 +13,18 @@
 </div>
 <div class="row">
     <div class="col-5">
-        <div class="text-center"><h4>Какая высота должна быть?</h4></div>
+        <div class="text-right"><h4>Какая высота должна быть?</h4></div>
     </div>
     <div class="col-7">
-        # нужно создать поле ввода
+        {{ edit_form.x }}
     </div>
 </div>
 <div class="row">
     <div class="col-5">
-        <div class="text-center"><h4>Какая ширина должна быть?</h4></div>
+        <div class="text-right"><h4>Какая ширина должна быть?</h4></div>
     </div>
     <div class="col-7">
-        # нужно создать поле ввода
-    </div>
-</div>
-<div class="row">
-    <div class="col-5">
-        <div class="text-center"><h4>Сколько процентов высоты фото должно быть отреазано?</h4></div>
-    </div>
-    <div class="col-7">
-        # нужно создать поле ввода
-    </div>
-</div>
-<div class="row">
-    <div class="col-5">
-        <div class="text-center"><h4>Сколько процентов ширины фото должно быть отреазано?</h4></div>
-    </div>
-    <div class="col-7">
-        # нужно создать поле ввода
+        {{ edit_form.y }}
     </div>
 </div>
 <form method="post" class="col-9">
