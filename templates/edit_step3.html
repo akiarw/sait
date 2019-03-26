@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-2">
+        <div class="text-center"><h1>Шаг 3</h1></div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-8">
+        <div class="text-center"><h2>Выбери нужные фильтры</h2></div>
+        <div class="text-center">Применение некоторых фильтров может занять время, пожалуйста подождите</div>
+    </div>
+</div>
+<form method="post">
+    <div class="row">
+        <div class="col-1">
+            <div class="text-center">{{ form.sepia() }}</div>
+        </div>
+        <div class="col-1">
+            <div class="text-center">{{ form.anagliph() }}</div>
+        </div>
+        <div class="col-2">
+            <div class="text-center">{{ form.mosaic() }}</div>
+        </div>
+        <div class="col-2">
+            <div class="text-center">{{ form.monochrome() }}</div>
+        </div>
+        <div class="col-2">
+            <div class="text-center">{{ form.full_monochrome() }}</div>
+        </div>
+        <div class="col-2">
+            <div class="text-center">{{ form.negative() }}</div>
+        </div>
+        <div class="col-2">
+            <div class="text-center">{{ form.bright() }}</div>
+        </div>
+</form>
+<div class="carousel-inner">
+    <div class="col-12">
+            <div class="carousel-item active">
+                <img src="" class="d-block w-100" alt="...">  # нужно указать путь к изменяемому файлу
+            </div>
+    </div>
+</div>
+    # Здесь нужно добавить кнопку "Добавить в мою коллекцию"
+{% endblock %}
