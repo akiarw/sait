@@ -227,7 +227,7 @@ class Server:
                 return red
             return render_template('edit_step2.html', form=main_form, edit_form=edit_form)
 
-        @app.route('/edit_step3' methods=['GET', 'POST'])
+        @app.route('/edit_step3', methods=['GET', 'POST'])
         def step3():
             main_form = MainForm()
             red = redirection()
