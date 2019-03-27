@@ -141,6 +141,7 @@ class MainForm(FlaskForm):
     full_monochrome = SubmitField('HARD Монохром')
     negative = SubmitField('Негатив')
     bright = SubmitField('Яркость')
+    coll = SubmitField('Добавить в мою коллекцию')
 
 
 class LoginForm(FlaskForm):
@@ -256,6 +257,16 @@ class Server:
                 elif request.form.get('bright'):
                     prc.bright()
                     prc.save(way)
+                elif request.form.get('coll'):
+                    num_ph = 1
+                    is_created = False
+                    while not is_created:
+                        coll_way = 'static/' + nickname + '/photo' + str(num_ph)
+                        if os.path.isfile(coll_way + ".jpg"):
+                            num_ph += 1
+                        else:
+                            is_created = True
+                    prc.save(coll_way)
             return render_template('edit_step3.html', form=main_form, edit_form=edit_form, src=way)
 
         @app.route('/account', methods=['GET', 'POST'])
@@ -287,8 +298,9 @@ class Server:
                     return redirect('/edit_step3')
 
         def sign_in():
-            global user
+            global user, nickname
             login = request.form['login']
+            nickname = login
             pwd = request.form['pwd']
             user = DBWorking(login)
             if login and pwd:
