@@ -14,6 +14,7 @@
 </div>
 <form method="post">
     <div class="row">
+        <br>
         <div class="col-1">
             <div class="text-center">{{ form.sepia() }}</div>
         </div>
@@ -36,16 +37,17 @@
             <div class="text-center">{{ form.bright() }}</div>
         </div>
 </form>
+<div class="col-3">
+    <br>
+    <div class="text-center">{{ form.coll() }}</div>
+</div>
+
 <div class="carousel-inner">
+    <br>
     <div class="col-12">
             <div class="carousel-item active">
                 <img src="" class="d-block w-100" alt="...">  # нужно указать путь к изменяемому файлу
             </div>
     </div>
 </div>
-<div class="row">
-        <div class="col-1">
-            <div class="text-center">{{ form.coll() }}</div>
-        </div>
-    # Здесь нужно добавить кнопку "Добавить в мою коллекцию"
 {% endblock %}

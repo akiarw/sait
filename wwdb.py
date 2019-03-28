@@ -42,7 +42,7 @@ class DBWorking(ImWorking):
 
     def save_im_info(self, name):
         cursor = self.connection.cursor()
-        cursor.execute('INSERT INTO images (login, im_name) VALUES (?,?)', (self.login, name, 0))
+        cursor.execute('INSERT INTO images (login, im_name) VALUES (?,?)', (self.login, name))
         self.connection.commit()
 
     def image_info(self, name):

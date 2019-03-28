@@ -258,15 +258,20 @@ class Server:
                     prc.bright()
                     prc.save(way)
                 elif request.form.get('coll'):
-                    num_ph = 1
-                    is_created = False
-                    while not is_created:
-                        coll_way = 'static/' + nickname + '/photo' + str(num_ph)
-                        if os.path.isfile(coll_way + ".jpg"):
-                            num_ph += 1
-                        else:
-                            is_created = True
-                    prc.save(coll_way)
+                    try:
+                        num_ph = 1
+                        is_created = False
+                        while not is_created:
+                            coll_way = 'static/' + nickname + '/photo' + str(num_ph)
+                            if os.path.isfile(coll_way + ".jpg"):
+                                num_ph += 1
+                            else:
+                                name_ph = 'photo' + str(num_ph) + '.jpg'
+                                is_created = True
+                        prc.save(coll_way)
+                        DBWorking(nickname).save_im_info(name_ph)
+                    except NameError:
+                        return redirect('/sign')
             return render_template('edit_step3.html', form=main_form, edit_form=edit_form, src=way)
 
         @app.route('/account', methods=['GET', 'POST'])
@@ -297,7 +302,9 @@ class Server:
                 elif request.form.get("apply"):
                     return redirect('/edit_step3')
 
+        @app.route('/error', methods=['GET', 'POST'])
         def sign_in():
+            main_form = MainForm()
             global user, nickname
             login = request.form['login']
             nickname = login
@@ -308,6 +315,8 @@ class Server:
                 if status == 'successful':
                     MainForm.authorise = SubmitField('Выход')
                     return redirect('/account')
+                else:
+                    return render_template('error.html', form=main_form)
                 return status
 
         def sign_up():
