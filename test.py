@@ -7,12 +7,7 @@ import os
 from processing import Processing
 
 
-class MainForm(FlaskForm):
-    main_page = SubmitField('Главная')
-    editor = SubmitField('Редактор')
-    authorise = SubmitField('Авторизация')
-    my_acc = SubmitField('Моя коллекция')
-    go_to_step3 = SubmitField('Перейти к следующему шагу')
+class FiltersForm(FlaskForm):
     sepia = SubmitField('Сепия')
     anagliph = SubmitField('Анаглиф')
     mosaic = SubmitField('Мозайка')
@@ -20,7 +15,6 @@ class MainForm(FlaskForm):
     full_monochrome = SubmitField('HARD Монохром')
     negative = SubmitField('Негатив')
     bright = SubmitField('Яркость')
-    coll = SubmitField('Добавить в мою коллекцию')
 
 
 class LoginForm(FlaskForm):
@@ -40,6 +34,15 @@ class AddImageForm(FlaskForm):
 class EditForm(AddImageForm):
     size_x = x = StringField('x', validators=[DataRequired()])
     size_y = y = StringField('y', validators=[DataRequired()])
+    to_step3 = SubmitField('Перейти к следующему шагу')
+    coll = SubmitField('Добавить в мою коллекцию')
+
+
+class MainForm(FiltersForm, LoginForm, EditForm):
+    main_page = SubmitField('Главная')
+    editor = SubmitField('Редактор')
+    authorise = SubmitField('Авторизация')
+    my_acc = SubmitField('Моя коллекция')
 
 
 class Server:
@@ -58,7 +61,6 @@ class Server:
         def sign():
             global user
             main_form = MainForm()
-            log_form = LoginForm()
             res = None
             if request.form:
                 if request.form.get('sign_in'):
@@ -80,7 +82,6 @@ class Server:
         def editor():
             global user
             main_form = MainForm()
-            edit_form = EditForm()
             red = redirection()
             if request.files:
                 image = request.files['img']
@@ -101,7 +102,6 @@ class Server:
         def step2():
             main_form = MainForm()
             red = redirection()
-            edit_form = EditForm()
             if red:
                 return red
             return render_template('edit_step2.html', form=main_form)
@@ -110,7 +110,6 @@ class Server:
         def step3():
             main_form = MainForm()
             red = redirection()
-            edit_form = EditForm()
             if red:
                 return red
             if request.form:
@@ -183,12 +182,10 @@ class Server:
         @app.route('/error', methods=['GET', 'POST'])
         def sign_in():
             main_form = MainForm()
-            global user, nickname
-            login = request.form['login']
-            nickname = login
-            pwd = request.form['pwd']
-            user = DBWorking(login)
-            if login and pwd:
+            if main_form.validate_on_submit():
+                login = request.form['login']
+                pwd = request.form['pwd']
+                session["login"] = login
                 status = user.sign_in(pwd)
                 if status == 'successful':
                     MainForm.authorise = SubmitField('Выход')
