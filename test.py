@@ -1,11 +1,11 @@
+import os
+from random import randrange, choice
+
 from flask import Flask, render_template, redirect, request, session
 from flask_wtf import FlaskForm
 from wtforms import *
 from wtforms.validators import DataRequired
-from random import randrange
-import os
-from wwdb import DBWorking
-import os
+
 from processing import Processing
 
 
@@ -37,6 +37,7 @@ class EditForm(AddImageForm):
     size_x = x = StringField('x', validators=[DataRequired()])
     size_y = y = StringField('y', validators=[DataRequired()])
     coll = SubmitField('Добавить в мою коллекцию')
+    submit = SubmitField('Применить')
     to_step3 = SubmitField('Перейти к следующему шагу')
 
 
@@ -66,8 +67,13 @@ def redirection():
             return redirect('/editor')
         elif request.form.get("my_acc"):
             return redirect('/account')
-        elif request.form.get("to_step3"):
-            return redirect('/edit_step3')
+    return None
+
+
+def name_next_image(name):
+    num = int(name.split(')', maxsplit=1)[0][1:])
+    name = '({}){}'.format(num + 1, name.split(')', maxsplit=1)[1])
+    return name
 
 
 def make_id():
@@ -75,7 +81,7 @@ def make_id():
     dirs = os.listdir('static/editor')
     while True:
         for i in range(30):
-            name += chr(randrange(65, 123))
+            name += chr(choice([randrange(49, 57), randrange(65, 91), randrange(97, 123)]))
         if name not in dirs:
             return name
 
@@ -86,6 +92,8 @@ def make_edit_dir():
         os.mkdir(session['path'])
     except FileExistsError:
         pass
+    except FileNotFoundError:
+        session['id'] = make_id()
 
 
 @app.route('/', methods=["GET", "POST"])
@@ -98,6 +106,36 @@ def main():
     if red:
         return red
     return render_template('main.html', form=main_form)
+
+
+@app.route('/edit_step2', methods=["GET", "POST"])
+def edit_step2():
+    main_form = MainForm()
+    red = redirection()
+    session['image'] = Processing(session['path'] + session['im_name'])
+    if red:
+        return red
+    if request.form.get('submit'):
+        x, y = int(request.form['x']), int(request.form['y'])
+        session['image'].resize(x, y, True)
+        session['im_name'] = name_next_image(session['im_name'])
+        session['image'].save(session['path'] + session['im_name'])
+    elif request.form.get("to_step3"):
+        return redirect('/edit_step3')
+    return render_template('edit_step2.html', form=main_form, id=session['id'], name=session['im_name'])
+
+
+@app.route('/edit_step3', methods=["GET", "POST"])
+def edit_step3():
+    main_form = MainForm()
+    red = redirection()
+    if red:
+        return red
+    if request.form.get('sepia'):
+        session['image'].sepia()
+        session['im_name'] = name_next_image(session['im_name'])
+        session['image'].save(session['path'] + session['im_name'])
+    return render_template('edit_step3.html', form=main_form, id=session['id'], name=session['im_name'])
 
 
 @app.route('/sign', methods=["GET", "POST"])
@@ -128,8 +166,9 @@ def editor():
     if request.files and request.form.get('to_step2'):
         make_edit_dir()
         image = request.files['img']
-        name = str(image).split("'")[1]
-        with open(session['path'] + name + '1.jpg', 'wb') as file:
+        session['im_name'] = '(1)' + str(image).split("'")[1]
+        session['ims'] = [session['im_name']]
+        with open(session['path'] + session['im_name'], 'wb') as file:
             file.write(image.read())
         return redirect('/edit_step2')
     if red:

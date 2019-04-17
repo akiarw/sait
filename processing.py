@@ -1,5 +1,6 @@
-from PIL import Image
 import sys
+
+from PIL import Image
 
 
 class Filters:
@@ -65,19 +66,16 @@ class Shaping:
         self.size_x, self.size_y = self.image.size
         self.sub_image = None
 
-    def resize(self, x, y=None, is_perc=False):
+    def resize(self, x, y, is_perc=False):
         if is_perc:
-            if y:
-                x *= self.size_x // 100
-                y *= self.size_y // 100
-            else:
-                x = (x[0] * self.size_x // 100, x[1] * self.size_y // 100)
-        if y:
+            x *= int(self.size_x / 100)
+            y *= int(self.size_y / 100)
+        try:
+            print(x, y)
             self.image = self.image.resize((x, y))
-            self.size_x, self.size_y = x, y
-        else:
-            self.image = self.image.resize(x)
-            self.size_x, self.size_y = x
+        except ValueError:
+            pass
+        self.size_x, self.size_y = x, y
 
     def crop(self, lup, rdwn, is_perc=False):
         if is_perc:
